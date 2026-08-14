@@ -24,9 +24,7 @@ namespace AsistenteOpenAI.Services
             }
 
             this.cliente = new ResponsesClient("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");
-            this
-                
-                lo = modelo;
+            this.modelo = modelo;
         }
 
         public async Task<RespuestaIA> PreguntarAsync(PreguntaIA pregunta)
