@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenAI.Responses;
-
+using System;
 namespace AsistenteOpenAI.Services
 {
     public class OpenAIService : IAsistenteIA
@@ -23,7 +23,7 @@ namespace AsistenteOpenAI.Services
                 throw new ArgumentException("El nombre del modelo no puede estar vacío.", nameof(modelo));
             }
 
-            this.cliente = new ResponsesClient("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");
+            this.cliente = new ResponsesClient("OPEN_APIKEY");
             this.modelo = modelo;
         }
 
