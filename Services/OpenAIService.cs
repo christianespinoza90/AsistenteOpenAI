@@ -23,7 +23,7 @@ namespace AsistenteOpenAI.Services
                 throw new ArgumentException("El nombre del modelo no puede estar vacío.", nameof(modelo));
             }
 
-            this.cliente = new ResponsesClient("OPEN_APIKEY");
+            this.cliente = new ResponsesClient ("OPEN_APIKEY");
             this.modelo = modelo;
         }
 
