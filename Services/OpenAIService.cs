@@ -1,4 +1,4 @@
-﻿﻿using AsistenteOpenAI.Interfaces;
+﻿using AsistenteOpenAI.Interfaces;
 using AsistenteOpenAI.Models;
 using System;
 using System.Collections.Generic;
@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenAI.Responses;
-using System;
+
 namespace AsistenteOpenAI.Services
 {
     public class OpenAIService : IAsistenteIA
     {
 
-        #pragma warning disable OPENAI001
+#pragma warning disable OPENAI001
         private readonly ResponsesClient cliente;
         private readonly string modelo;
 
@@ -23,7 +23,7 @@ namespace AsistenteOpenAI.Services
                 throw new ArgumentException("El nombre del modelo no puede estar vacío.", nameof(modelo));
             }
 
-            this.cliente = new ResponsesClient ("OPEN_APIKEY");
+            this.cliente = new ResponsesClient("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");
             this.modelo = modelo;
         }
 
@@ -38,7 +38,7 @@ namespace AsistenteOpenAI.Services
                 $"El estudiante se llama {pregunta.Estudiante} Responde de manera clara y concisa." +
                 $"Pregunta del estudiante: {pregunta.Texto}";
 
-            ResponseResult resultado =await cliente.CreateResponseAsync(modelo, instrucciones);
+            ResponseResult resultado = await cliente.CreateResponseAsync(modelo, instrucciones);
 
             string textoRespuesta = resultado.GetOutputText();
             RespuestaIA respuestaIA = new RespuestaIA(textoRespuesta, modelo);
