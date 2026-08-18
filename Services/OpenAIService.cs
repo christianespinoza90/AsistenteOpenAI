@@ -23,7 +23,7 @@ namespace AsistenteOpenAI.Services
                 throw new ArgumentException("El nombre del modelo no puede estar vacío.", nameof(modelo));
             }
 
-            this.cliente = new ResponsesClient("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");
+            this.cliente = new ResponsesClient("CLAVE SECRETA");
             this.modelo = modelo;
         }
 
