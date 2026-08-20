@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AsistenteOpenAI.Models
 {
     public class PreguntaIA
     {
+        public int Id { get; set; } // Identificador para la Base de Datos
+        public string Estudiante { get; set; }
+        public string Asignatura { get; set; }
+        public string Texto { get; set; }
 
-        public String Estudiante { get; set; }
-        public String Asignatura { get; set; }
-        public String Texto { get; set; }
+        // Propiedad de navegación para la relación 1 a 1 en EF Core
+        public RespuestaIA? Respuesta { get; set; }
+
+        public PreguntaIA() { } // Constructor vacío para EF Core
+
         public PreguntaIA(string estudiante, string asignatura, string texto)
         {
             if (string.IsNullOrWhiteSpace(estudiante))
@@ -26,10 +28,10 @@ namespace AsistenteOpenAI.Models
             {
                 throw new ArgumentException("El texto de la pregunta no puede estar vacío.", nameof(texto));
             }
+
             Estudiante = estudiante;
             Asignatura = asignatura;
             Texto = texto;
         }
-
     }
 }

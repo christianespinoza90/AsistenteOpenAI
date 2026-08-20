@@ -1,33 +1,72 @@
-﻿using AsistenteOpenAI.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using AsistenteOpenAI.Services;
+using AsistenteOpenAI.Datos;
+using AsistenteOpenAI.Interfaces;
 using AsistenteOpenAI.Models;
 
-namespace AsistenteOpenAI
+// ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA! Le dice al programa que ejecute tu código.
+await RealizarPreguntaAsync();
+
+static async Task RealizarPreguntaAsync()
 {
-    internal class Program
+    Console.Clear();
+    Console.WriteLine("********** Crear Pregunta a la IA **********");
+    Console.Write("Ingrese su nombre: ");
+    string estudiante = Console.ReadLine();
+    Console.Write("Ingrese la asignatura: ");
+    string asignatura = Console.ReadLine();
+    Console.Write("Ingrese su pregunta: ");
+    string textoPregunta = Console.ReadLine();
+
+    try
     {
-        static async Task Main(string[] args)
+        using (var context = new AsistenteDbContext())
         {
-            Console.WriteLine("Bienvenido al Asistente de IA para estudiantes.");
-            Console.Write("Ingrese su nombre: ");
-            string estudiante = Console.ReadLine();
-            Console.Write("Ingrese la asignatura: ");
-            string asignatura = Console.ReadLine();
-            Console.Write("Ingrese su pregunta: ");
-            string textoPregunta = Console.ReadLine();
-            PreguntaIA pregunta = new PreguntaIA(estudiante, asignatura, textoPregunta);
-            IAsistenteIA asistenteIA = new Services.OpenAIService("gpt-4o-mini");
-            try
+            // 1. BUSCAR SI LA PREGUNTA YA EXISTE EN LA BASE DE DATOS
+            var preguntaExistente = context.Preguntas
+                .Include(p => p.Respuesta)
+                .FirstOrDefault(p =>
+                    p.Texto.Trim().ToLower() == textoPregunta.Trim().ToLower() &&
+                    p.Asignatura.Trim().ToLower() == asignatura.Trim().ToLower());
+
+            if (preguntaExistente != null && preguntaExistente.Respuesta != null)
             {
-                RespuestaIA respuesta = await asistenteIA.PreguntarAsync(pregunta);
-                Console.WriteLine($"\nRespuesta del asistente:\n{respuesta.Texto}");
-                Console.WriteLine($"\nModelo utilizado: {respuesta.ModeloUtilizado}");
-                Console.WriteLine($"Fecha de respuesta: {respuesta.Fecha}");
-                Console.ReadLine();
+                // 2. LA PREGUNTA YA SE HIZO ANTES -> MOSTRAR RESPUESTA GUARDADA
+                Console.WriteLine("\n[✅ Respuesta encontrada en la Base de Datos Local]");
+                Console.WriteLine("--- Respuesta Recuperada ---");
+                Console.WriteLine(preguntaExistente.Respuesta.Texto);
+                Console.WriteLine($"\nModelo: {preguntaExistente.Respuesta.ModeloUtilizado} (Desde Caché SQL)");
+                Console.WriteLine($"Fecha original: {preguntaExistente.Respuesta.Fecha:dd/MM/yyyy HH:mm}");
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"Ocurrió un error al procesar la pregunta: {ex.Message}");
+                // 3. LA PREGUNTA ES NUEVA -> CONSULTAR A OPENAI
+                PreguntaIA nuevaPregunta = new PreguntaIA(estudiante, asignatura, textoPregunta);
+                IAsistenteIA asistenteIA = new OpenAIService("gpt-4o-mini");
+
+                Console.WriteLine("\n[🌐 Pregunta nueva. Consultando a OpenAI...]");
+                RespuestaIA nuevaRespuesta = await asistenteIA.PreguntarAsync(nuevaPregunta);
+
+                // 4. GUARDAR LA NUEVA PREGUNTA Y RESPUESTA EN SQL SERVER
+                context.Preguntas.Add(nuevaPregunta);
+                context.SaveChanges();
+
+                nuevaRespuesta.PreguntaIAId = nuevaPregunta.Id;
+                context.Respuestas.Add(nuevaRespuesta);
+                context.SaveChanges();
+
+                Console.WriteLine("\n--- Respuesta de OpenAI ---");
+                Console.WriteLine(nuevaRespuesta.Texto);
+                Console.WriteLine($"\nModelo: {nuevaRespuesta.ModeloUtilizado}");
+                Console.WriteLine($"Fecha: {nuevaRespuesta.Fecha:dd/MM/yyyy HH:mm}");
+                Console.WriteLine("\n¡La nueva pregunta y respuesta han sido guardadas en SQL Server!");
             }
         }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"\nOcurrió un error: {ex.Message}");
+    }
+
+    Console.ReadLine(); // Esto mantendrá la consola abierta al final
 }
