@@ -1,12 +1,34 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using AsistenteOpenAI.Services;
 using AsistenteOpenAI.Datos;
 using AsistenteOpenAI.Interfaces;
 using AsistenteOpenAI.Models;
 
-// ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA! Le dice al programa que ejecute tu código.
-await RealizarPreguntaAsync();
+bool continuar = true;
 
+// Este ciclo mantendrá el programa vivo hasta que decidas salir
+while (continuar)
+{
+    await RealizarPreguntaAsync();
+
+    Console.WriteLine("\n================================================");
+    Console.Write("¿Deseas realizar otra pregunta? (S para Sí / N para Salir): ");
+    string respuesta = Console.ReadLine();
+
+    if (respuesta?.Trim().ToUpper() != "S")
+    {
+        continuar = false; // Rompe el ciclo y cierra el programa
+    }
+}
+
+Console.WriteLine("\n¡Gracias por usar el Asistente IA! Cerrando sistema...");
+await Task.Delay(1500); // Espera un segundito antes de cerrar para que se vea bonito
+
+
+// AQUÍ EMPIEZA TU MÉTODO ORIGINAL
 static async Task RealizarPreguntaAsync()
 {
     Console.Clear();
@@ -67,6 +89,4 @@ static async Task RealizarPreguntaAsync()
     {
         Console.WriteLine($"\nOcurrió un error: {ex.Message}");
     }
-
-    Console.ReadLine(); // Esto mantendrá la consola abierta al final
 }
